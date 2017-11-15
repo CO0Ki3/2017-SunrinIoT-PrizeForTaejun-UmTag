@@ -37,16 +37,23 @@ void loop() {
     delay(50);//should catch full input
     uint8_t sendBuffer[21];
     uint8_t sendLength = 0;
-    lib_aci_send_data(PIPE_UART_OVER_BTLE_UART_TX_TX, sendBuffer, sendLength);
     while (SerialMonitorInterface.available()) {
       sendBuffer[sendLength] = SerialMonitorInterface.read();
       sendLength++;
     }
+    if (SerialMonitorInterface.available()) {
+      while (SerialMonitorInterface.available()) {
+        SerialMonitorInterface.write(SerialMonitorInterface.read());
+      }
+      SerialMonitorInterface.println();
+    }
     sendBuffer[sendLength] = '\0';
     sendLength++;
+    if (!lib_aci_send_data(PIPE_UART_OVER_BTLE_UART_TX_TX, (uint8_t*)sendBuffer, sendLength)) {
+    }
     int i;
     char UniToText[21]={};
-  for(i = 0; i < 21; i++) {
+    for(i = 0; i < 21; i++) {
     UniToText[i] = (char)sendBuffer[i];
     Serial.print(UniToText[i]);
   }
